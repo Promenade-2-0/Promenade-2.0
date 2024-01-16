@@ -10,91 +10,105 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  userID        Int     @id @default(auto()) @map("_id") @db.Int
-  Password      String  
-  email         String  
-  Postal_code   String
-  state         String  
-  Address       String
+model UserAccount {
+  UserID        Int          @id @map("_id") @db.Int
+  Password      String
+  Email         String      @unique
+  Postal_Code   String
+  State         String
+  Address_line1 String      @default(" ")
+  Address_line2 String?     @default(" ")
   fname         String
   lname         String
-}
-
-model Product {
-  productID   Int @id @default(auto()) @map("_id") @db.Int
-  name        String
-  description String
-  price       Double
-  stock       Int
-  Image       String
-  type        Type @relation(fields: [typeID], references: [typeID])
-  typeID      Int
-  country     Country @relation(fields: [countryID], references: [countryID])
-  countryID   Int
-  region      Region @relation(fields: [regionID], references: [regionID])
-  regionID    Int
+  Cart          Cart[]          
+  Invoice       Invoice[]      
 }
 
 model Type {
-  typeID Int @id @default(auto()) @map("_id") @db.Int
-  typeName   String
+  TypeID    Int    @id @map("_id") @db.Int
+  TypeName  String?
+  products  Product[]
 }
 
 model Country {
-  countryID   Int @id @default(auto()) @map("_id") @db.Int
-  countryName String
+  CountryID   Int    @id @map("_id") @db.Int
+  CountryName String
+  products  Product[]
 }
+
 model Region {
-  regionID   Int @id @default(auto()) @map("_id") @db.Int
-  regionName String
+  RegionID   Int    @id @map("_id") @db.Int
+  RegionName String
+  products  Product[]
 }
 
-model Cart {
-  cartID         Int @id @default(auto()) @map("_id") @db.Int
-  user           User @relation(fields: [userID], references: [userID])
-  userID         Int
-  cartquantity   cartQuantity @relation(fields: [cartquantityID], references: [cartquantityID])
-  cartQuantityID Int
-  totalPrice     Double
-  shipping       Double
-  tax            Double
-  subtotal       Double
-  totalQuantity  Int
- }
-
-model cartQuantity {
-  cartQuantityID  Int @default(auto()) @map("_id") @db.Int
-  cart            Cart @relation(fields: [cartID], references: [cartID])
-  cartID          Int
-  cartproduct     CartProduct @relation(fields: [cartProductID], references: [cartProductID])
-  cartProductID   Int
-  quantity        Int
-  quantityPrice   Double
+model Product {
+  ProductID   Int         @id @map("_id") @db.Int
+  Name        String
+  Description String?
+  Price       Float
+  Stock       Int
+  Image       String?
+  type        Type        @relation(fields: [typeID], references: [TypeID])
+  typeID      Int         @db.Int
+  country     Country     @relation(fields: [countryID], references: [CountryID])
+  countryID   Int         @db.Int
+  region      Region      @relation(fields: [regionID], references: [RegionID])
+  regionID    Int         @db.Int
+  CartProduct CartProduct[]  
 }
 
 model CartProduct {
-  cartProductID Int @default(auto()) @map("_id") @db.Int
-  product Product @relation(fields: [productID], references: [productID])
-  productID Int
+  CartProductID Int         @id @map("_id") @db.Int
+  product       Product     @relation(fields: [productID], references: [ProductID])
+  productID     Int         @db.Int
+  CartQuantity  CartQuantity[]
+}
+
+model Cart {
+  CartID        Int           @id @map("_id") @db.Int
+  user          UserAccount   @relation(fields: [userID], references: [UserID])
+  userID        Int           @db.Int
+  totalPrice    Float
+  Shipping      Float?
+  Tax           Float
+  Subtotal      Float
+  Totalquantity Int
+  Invoice       Invoice[]    
+  CQR           CartToQuantityRelation[]   
+}
+
+model CartQuantity {
+  CartQuantityID Int                  @id @map("_id") @db.Int
+  cartProduct    CartProduct          @relation(fields: [cartProductID], references: [CartProductID])
+  cartProductID  Int                  @db.Int
+  Quantity       Int
+  QuantityPrice  Float
+  CartToQuantity CartToQuantityRelation[]
+}
+
+model CartToQuantityRelation {
+  CQR             Int                  @id @map("_id") @db.Int
+  cartQuantity    CartQuantity         @relation(fields: [cartQuantityID], references: [CartQuantityID])
+  cartQuantityID  Int                  @db.Int
+  cart            Cart                 @relation(fields: [cartID], references: [CartID])
+  cartID          Int                  @db.Int
 }
 
 model Invoice {
-  invoiceID    Int @default(auto()) @map("_id") @db.Int
-  purchaseDate String
-  user         User @relation(fields: [userID], references: [userID])
-  userID       Int
-  cart         Cart @relation(fields: [cartID], references: [cartID])
-  cartID       Int
-  dateCreated  String
+  InvoiceID    Int       @id @map("_id") @db.Int
+  purchaseDate DateTime
+  user         UserAccount  @relation(fields: [userID], references: [UserID])
+  userID       Int      @db.Int
+  cart         Cart         @relation(fields: [cartID], references: [CartID])
+  cartID       Int      @db.Int
+  dateCreated  DateTime
 }
 
 model Billing {
-  billingID    Int @default(auto()) @map("_id") @db.Int
-  cardNumber   Int
-  expiration   String
-  securityCode Int
+  BillingID        Int  @id @map("_id") @db.Int
+  cardNumber       Int
+  ExpirationMonth  Int
+  ExpirationYear   Int
+  securityCode     Int
 }
-
-
-
