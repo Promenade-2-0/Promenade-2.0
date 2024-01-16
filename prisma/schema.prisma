@@ -9,3 +9,92 @@ datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  userID        Int     @id @default(auto()) @map("_id") @db.Int
+  Password      String  
+  email         String  
+  Postal_code   String
+  state         String  
+  Address       String
+  fname         String
+  lname         String
+}
+
+model Product {
+  productID   Int @id @default(auto()) @map("_id") @db.Int
+  name        String
+  description String
+  price       Double
+  stock       Int
+  Image       String
+  type        Type @relation(fields: [typeID], references: [typeID])
+  typeID      Int
+  country     Country @relation(fields: [countryID], references: [countryID])
+  countryID   Int
+  region      Region @relation(fields: [regionID], references: [regionID])
+  regionID    Int
+}
+
+model Type {
+  typeID Int @id @default(auto()) @map("_id") @db.Int
+  typeName   String
+}
+
+model Country {
+  countryID   Int @id @default(auto()) @map("_id") @db.Int
+  countryName String
+}
+model Region {
+  regionID   Int @id @default(auto()) @map("_id") @db.Int
+  regionName String
+}
+
+model Cart {
+  cartID         Int @id @default(auto()) @map("_id") @db.Int
+  user           User @relation(fields: [userID], references: [userID])
+  userID         Int
+  cartquantity   cartQuantity @relation(fields: [cartquantityID], references: [cartquantityID])
+  cartQuantityID Int
+  totalPrice     Double
+  shipping       Double
+  tax            Double
+  subtotal       Double
+  totalQuantity  Int
+ }
+
+model cartQuantity {
+  cartQuantityID  Int @default(auto()) @map("_id") @db.Int
+  cart            Cart @relation(fields: [cartID], references: [cartID])
+  cartID          Int
+  cartproduct     CartProduct @relation(fields: [cartProductID], references: [cartProductID])
+  cartProductID   Int
+  quantity        Int
+  quantityPrice   Double
+}
+
+model CartProduct {
+  cartProductID Int @default(auto()) @map("_id") @db.Int
+  product Product @relation(fields: [productID], references: [productID])
+  productID Int
+}
+
+model Invoice {
+  invoiceID    Int @default(auto()) @map("_id") @db.Int
+  purchaseDate String
+  user         User @relation(fields: [userID], references: [userID])
+  userID       Int
+  cart         Cart @relation(fields: [cartID], references: [cartID])
+  cartID       Int
+  dateCreated  String
+}
+
+model Billing {
+  billingID    Int @default(auto()) @map("_id") @db.Int
+  cardNumber   Int
+  expiration   String
+  securityCode Int
+}
+
+
+
