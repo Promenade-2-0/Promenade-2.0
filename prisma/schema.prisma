@@ -11,87 +11,102 @@ datasource db {
 }
 
 model User {
-  userID        Int     @id @default(auto()) @map("_id") @db.Int
+  userID        Int     @id @map("_id") @db.Int
   Password      String  
-  email         String  
+  email         String  @unique
   Postal_code   String
   state         String  
-  Address       String
+  Address1      String  @default(" ")
+  Address2      String  @default(" ")
   fname         String
   lname         String
+  cart          Cart[]
+  invoice       Invoice[]
 }
 
 model Product {
-  productID   Int @id @default(auto()) @map("_id") @db.Int
+  ID   Int    @id @map("_id") @db.Int
   name        String
   description String
-  price       Double
+  price       Float
   stock       Int
   Image       String
   type        Type @relation(fields: [typeID], references: [typeID])
-  typeID      Int
+  typeID      Int @db.Int
   country     Country @relation(fields: [countryID], references: [countryID])
-  countryID   Int
+  countryID   Int @db.Int
   region      Region @relation(fields: [regionID], references: [regionID])
-  regionID    Int
+  regionID    Int @db.Int
+  cartProd    CartProduct[]
 }
 
 model Type {
-  typeID Int @id @default(auto()) @map("_id") @db.Int
-  typeName   String
+  typeID   Int @id @map("_id") @db.Int
+  typeName String
+  products Product[]
 }
 
 model Country {
-  countryID   Int @id @default(auto()) @map("_id") @db.Int
+  countryID   Int @id @map("_id") @db.Int
   countryName String
+  products    Product[]
 }
 model Region {
-  regionID   Int @id @default(auto()) @map("_id") @db.Int
+  regionID   Int @id @map("_id") @db.Int
   regionName String
+  products   Product[]
 }
 
 model Cart {
-  cartID         Int @id @default(auto()) @map("_id") @db.Int
+  cartID         Int @id @map("_id") @db.Int
   user           User @relation(fields: [userID], references: [userID])
-  userID         Int
-  cartquantity   cartQuantity @relation(fields: [cartquantityID], references: [cartquantityID])
-  cartQuantityID Int
-  totalPrice     Double
-  shipping       Double
-  tax            Double
-  subtotal       Double
+  userID         Int @db.Int
+  totalPrice     Float
+  shipping       Float
+  tax            Float
+  subtotal       Float
   totalQuantity  Int
+  cQr            CarttoQuantityRelation[]
+  invoice        Invoice[]
+ }
+
+ model CarttoQuantityRelation {
+  id              Int @id @map("_id") @db.Int
+  cart            Cart @relation(fields: [cartID], references: [cartID])
+  cartID          Int @db.Int
+  cartquantity    cartQuantity @relation(fields: [cartQuantityID], references: [cartQuantityID])
+  cartQuantityID  Int @db.Int
  }
 
 model cartQuantity {
-  cartQuantityID  Int @default(auto()) @map("_id") @db.Int
-  cart            Cart @relation(fields: [cartID], references: [cartID])
-  cartID          Int
+  cartQuantityID  Int @id @map("_id") @db.Int
   cartproduct     CartProduct @relation(fields: [cartProductID], references: [cartProductID])
-  cartProductID   Int
+  cartProductID   Int @db.Int
   quantity        Int
-  quantityPrice   Double
+  quantityPrice   Float
+  cQr             CarttoQuantityRelation[]
 }
 
 model CartProduct {
-  cartProductID Int @default(auto()) @map("_id") @db.Int
-  product Product @relation(fields: [productID], references: [productID])
-  productID Int
+  cartProductID  Int @id @map("_id") @db.Int
+  product        Product  @relation(fields: [productID], references: [ID])
+  productID      Int @db.Int
+  cartQ          cartQuantity[]
 }
 
 model Invoice {
-  invoiceID    Int @default(auto()) @map("_id") @db.Int
+  invoiceID    Int @id @map("_id") @db.Int
   purchaseDate String
   user         User @relation(fields: [userID], references: [userID])
-  userID       Int
+  userID       Int  @db.Int
   cart         Cart @relation(fields: [cartID], references: [cartID])
-  cartID       Int
+  cartID       Int  @db.Int
   dateCreated  String
 }
 
 model Billing {
-  billingID    Int @default(auto()) @map("_id") @db.Int
-  cardNumber   Int
+  billingID    Int @id @map("_id") @db.Int
+  cardNumber   Int @unique
   expiration   String
   securityCode Int
 }
